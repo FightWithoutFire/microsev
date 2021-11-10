@@ -10,24 +10,22 @@ import (
 )
 
 const (
-	Address = "127.0.0.1:5210"
+	Address = "127.0.0.1:52100"
 )
 
 type helloService struct {
+	pb.HelloServer
 }
 
-func (s helloService) mustEmbedUnimplementedHelloServer() {
-	panic("implement me")
-}
-
-func (s helloService) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloResponse, error)  {
+func (s helloService) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloResponse, error) {
 	resp := new(pb.HelloResponse)
 	resp.Message = fmt.Sprintf("Hello %s.", in.Name)
-
+	fmt.Printf("response: %s", resp.Message)
 	return resp, nil
 }
 
 var HelloService = helloService{}
+
 func main() {
 
 	listen, err := net.Listen("tcp", Address)
@@ -38,5 +36,10 @@ func main() {
 	server := grpc.NewServer()
 	pb.RegisterHelloServer(server, HelloService)
 	grpclog.Println("Listen on " + Address)
-	server.Serve(listen)
+	fmt.Printf("server started")
+	err = server.Serve(listen)
+	if err != nil {
+		fmt.Printf("error: %v", err)
+		return
+	}
 }
